@@ -1,8 +1,6 @@
 require("sprite-generation")
 require("sprite-segments")
 
-local segmentsData = MergingChests.SpriteSegmentsData
-
 function MergingChests.LimitInventorySize(default_inventory_size, tiles)
 	return util.clamp(
 		default_inventory_size * tiles * settings.startup["inventory-size-multiplier"].value,
@@ -68,7 +66,7 @@ function MergingChests.CreateWideChestEntity(data, size)
 		{ "chest-name.wide-"..data.type.."-chest", size },
 		"wide-chests",
 		size, 1,
-		MergingChests.CreateSprite(size, 1, segmentsData.wide_segments[data.id] or segmentsData.wide_segments[MergingChests.OTHER]),
+		MergingChests.CreateSprite(size, 1, MergingChests.GetWideChestSpriteSegmentsData(data.id)),
 		circuit_connector_definitions["chest"]
 	)
 end
@@ -92,7 +90,7 @@ function MergingChests.CreateHighChestEntity(data, size)
 		{ "chest-name.high-"..data.type.."-chest", size },
 		"high-chests",
 		1, size,
-		MergingChests.CreateSprite(1, size, segmentsData.high_segments[data.id] or segmentsData.high_segments[MergingChests.OTHER]),
+		MergingChests.CreateSprite(1, size, MergingChests.GetHighChestSpriteSegmentsData(data.id)),
 		connectorV
 	)
 end
@@ -116,7 +114,7 @@ function MergingChests.CreateWarehouseEntity(data, width, height)
 		{ "chest-name."..data.type.."-warehouse", width, height },
 		"warehouse",
 		width, height,
-		MergingChests.CreateSprite(width, height, segmentsData.warehouse_segments[data.id] or segmentsData.warehouse_segments[MergingChests.OTHER]),
+		MergingChests.CreateSprite(width, height, MergingChests.GetWarehouseSpriteSegmentsData(data.id)),
 		connector
 	)
 end
@@ -140,7 +138,7 @@ function MergingChests.CreateTrashdumpEntity(data, width, height)
 		{ "chest-name."..data.type.."-trashdump", width, height },
 		"trashdump",
 		width, height,
-		MergingChests.CreateSprite(width, height, segmentsData.trashdump_segments[data.id] or segmentsData.trashdump_segments[MergingChests.OTHER]),
+		MergingChests.CreateSprite(width, height, MergingChests.GetTrashdumpSpriteSegmentsData(data.id)),
 		connector
 	)
 end
@@ -149,18 +147,18 @@ local limits = MergingChests.Limits()
 for _, id in ipairs(MergingChests.MergableChestIds) do
 	local chestData = MergingChests.MergableChestIdToData[id]
 	for j = 2, math.min(limits.height, limits.area) do
-		if MergingChests.CheckWhitelist(chestData.id, 1, j) then
+		if MergingChests.CheckWhitelist(1, j) then
 			data:extend({ MergingChests.CreateHighChestEntity(chestData, j) })
 		end
 	end
 
 	for i = 2, math.min(limits.width, limits.area) do
-		if MergingChests.CheckWhitelist(chestData.id, i, 1) then
+		if MergingChests.CheckWhitelist(i, 1) then
 			data:extend({ MergingChests.CreateWideChestEntity(chestData, i) })
 		end
 
 		for j = 2, math.min(limits.height, limits.area) do
-			if MergingChests.CheckWhitelist(chestData.id, i, j) then
+			if MergingChests.CheckWhitelist(i, j) then
 				if i > settings.startup["warehouse-threshold"].value and j > settings.startup["warehouse-threshold"].value then
 					data:extend({ MergingChests.CreateTrashdumpEntity(chestData, i, j) })
 				else

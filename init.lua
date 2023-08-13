@@ -1,5 +1,6 @@
 require("init-settings")
 
+---@return {width: number, height: number, area: number}
 function MergingChests.Limits()
 	if MergingChests.CheckMod(MergingChests.UnlimitedModName) then
 		return {
@@ -28,6 +29,8 @@ for _, data in pairs(MergingChests.MergableChestIdToData) do
 end
 
 local ANY = "any-size"
+
+--- @type nil | { [number|`ANY`]: { [number|`ANY`]: boolean } }
 local chestWhitelist = nil
 function parseWhitelist()
 	chestWhitelist = { }
@@ -45,32 +48,19 @@ function parseWhitelist()
 			end
 		end
 	end
+
 	if not hasItem then
 		chestWhitelist = { [ANY] = { [ANY] = true } }
 	end
+
+	return chestWhitelist
 end
 
-MergingChests.AreaChests = {
-	["wooden-chest"] = true,
-	["iron-chest"] = true,
-	["steel-chest"] = true,
-	["brass-chest"] = true,
-	["titanium-chest"] = true,
-	["small-storage"] = true,
-	["small-storage-2"] = true,
-	["small-storage-3"] = true,
-	["nullius-small-chest-1"] = true,
-	["nullius-small-chest-2"] = true
-}
-
-function MergingChests.CheckWhitelist(id, width, height)
-	if chestWhitelist == nil then
-		parseWhitelist()
-	end
+function MergingChests.CheckWhitelist(width, height)
+	chestWhitelist = chestWhitelist or parseWhitelist()
 
 	local limits = MergingChests.Limits()
 	return
-		(MergingChests.AreaChests[id] or width == 1 or height == 1) and
 		width * height <= limits.area and
 		width <= limits.width and
 		height <= limits.height and

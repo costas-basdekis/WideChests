@@ -22,13 +22,6 @@ function math.lcm(num1, num2)
 	return num1 * num2 / math.gcd(num1, num2)
 end
 
-function table.unpack(t, i)
-	i = i or 1
-	if t[i] ~= nil then
-		return t[i], unpack(t, i + 1)
-	end
-end
-
 function groupByName(t)
 	local result = { }
 	for _, item in ipairs(t) do

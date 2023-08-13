@@ -15,7 +15,7 @@ function MergingChests.PostprocessSprite(sprite)
 			lcm = math.lcm(lcm, layer.frame_count)
 		end
 	end
-	
+
 	if lcm > 1 then
 		for _, layer in ipairs(sprite) do
 			layer.repeat_count = lcm / (layer.frame_count or 1)
@@ -23,6 +23,9 @@ function MergingChests.PostprocessSprite(sprite)
 	end
 end
 
+---@param width number
+---@param height number
+---@param segments entity_sprite
 function MergingChests.CreateSprite(width, height, segments)
 	local sprite = { }
 
@@ -30,18 +33,22 @@ function MergingChests.CreateSprite(width, height, segments)
 	if segments.shadow then
 		MergingChests.CreateEntitySprite(width, height, segments.shadow, sprite)
 	end
-	
+
 	MergingChests.PostprocessSprite(sprite)
 
 	return sprite;
 end
 
+---@param width number
+---@param height number
+---@param segments sprite_definition
+---@param sprite table
 function MergingChests.CreateEntitySprite(width, height, segments, sprite)
 	local x0 = -width / 2
 	local y0 = -height / 2
 	local xM = width / 2 - 1
 	local yM = height / 2 - 1
-	
+
 	-- do top line
 	if segments.top_left then
 		table.insert(sprite, MergingChests.CreateSpriteInfo(segments, 0, x0, y0))
@@ -54,7 +61,7 @@ function MergingChests.CreateEntitySprite(width, height, segments, sprite)
 	if segments.top_right then
 		table.insert(sprite, MergingChests.CreateSpriteInfo(segments, 2, xM, y0))
 	end
-	
+
 	-- do middle horizontal lines
 	for y = 1, height - 2 do
 		if segments.left then
@@ -69,7 +76,7 @@ function MergingChests.CreateEntitySprite(width, height, segments, sprite)
 			table.insert(sprite, MergingChests.CreateSpriteInfo(segments, 5, xM, y0 + y))
 		end
 	end
-	
+
 	-- do bottom line
 	if segments.bottom_left then
 		table.insert(sprite, MergingChests.CreateSpriteInfo(segments, 6, x0, yM))
@@ -104,38 +111,45 @@ end
 -- top left corner of sprite will be placed onto center of entity (plus shifts)
 -- random decals may be used
 -- shiftX, shiftY = local segment tile shift
--- segments.shift.x, segments.shift.x = global entity pixel shift (32 pixels pet tile)
--- segment.shift.x, segment.shift.y = local segment pixel shift (32 pixels pet tile)
-function MergingChests.CreateSpriteInfo(segments, segmentIndex, shiftX, shiftY)
-	local segment = segments[segmentIndex]
-	
-	if #segment > 0 then
-		if prng.range(1, 100) < MergingChests.DecalChance then
-			segment = segment[prng.range(2, #segment)]
+-- shifts in segment(s) are pixel shifts
+---@param sprite_definition sprite_definition
+---@param segment_index number
+---@param shift_x number
+---@param shift_y number
+---@return table
+function MergingChests.CreateSpriteInfo(sprite_definition, segment_index, shift_x, shift_y)
+	local segment = sprite_definition[segment_index]
+	local main_segment = segment
+
+	if segment[1] ~= nil then
+		if segment[2] ~= nil and prng.range(1, 100) < MergingChests.DecalChance then
+			main_segment = segment[1]
+			segment = segment[prng.range(2, table_size(segment))]
 		else
+			main_segment = segment
 			segment = segment[1]
 		end
 	end
-	
-	local indexH, indexV = MergingChests.IndexToCoordinates(segmentIndex, 3)
-	local width = segment.width or segments.widths[indexH + 1]
-	local height = segment.height or segments.heights[indexV + 1]
-	
+
+	local index_horizontal, index_vertical = MergingChests.IndexToCoordinates(segment_index, 3)
+	local width = segment.width or sprite_definition.widths[index_horizontal]
+	local height = segment.height or sprite_definition.heights[index_vertical]
+
 	return
 	{
-		filename = segment.sprite or segments.sprite,
+		filename = segment.sprite or sprite_definition.sprite,
 		priority = "medium",
-		x = segment.x or 0,
-		y = segment.y or 0,
-		width = segment.width or width,
-		height = segment.height or height,
+		x = (segment.x or main_segment.x or 0),
+		y = (segment.y or main_segment.y or 0),
+		width = width,
+		height = height,
 		shift =
 		{
-			shiftX + (width / 2.0 * (segments.scale or 1.0) + (segment.shift and segment.shift.x or 0) + segments.shift.x) / 32.0,
-			shiftY + (height / 2.0 * (segments.scale or 1.0) + (segment.shift and segment.shift.y or 0) + segments.shift.y) / 32.0
+			shift_x + (width / 2.0 * (sprite_definition.scale or 1) + (segment.shift and segment.shift.x or 0) + sprite_definition.shift.x) / 32.0,
+			shift_y + (height / 2.0 * (sprite_definition.scale or 1) + (segment.shift and segment.shift.y or 0) + sprite_definition.shift.y) / 32.0
 		},
-		scale = segments.scale or 1,
+		scale = segment.scale or sprite_definition.scale or 1,
 		frame_count = segment.frame_count or 1,
-		draw_as_shadow = segments.shadow or false
+		draw_as_shadow = sprite_definition.shadow or false
 	}
 end
