@@ -106,7 +106,6 @@ local function create_entity(entity_data, loc_name, subgroup, width, height, seg
 	entity_data.override_prototype_properties = entity_data.override_prototype_properties or {}
 
 	local next_upgrade_name = entity_data.override_prototype_properties.next_upgrade or base_chest.next_upgrade
-	log('Chest '..base_chest.name..' '..(base_chest.next_upgrade or 'nil'))
 	entity_data.override_prototype_properties.next_upgrade = nil
 	local next_upgrade = next_upgrade_name and MergingChests.get_merged_chest_name(next_upgrade_name, width, height) or nil
 
@@ -308,76 +307,4 @@ function MergingChests.disable_next_upgrade_to(type, chest_name)
 			end
 		end
     end
-end
-
-local function aaa()
-	local total_count_log = math.floor(math.log(game.player.surface.count_entities_filtered({name = 'logistic-train-stop'}), 10) + 1)
-	local used_numbers = {}
-	local next_number = 1
-
-	local function rename(ts, number)
-		local ts_inputs = game.player.surface.find_entities_filtered({name = 'logistic-train-stop-input', position = ts.position, radius = 1})
-		if table_size(ts_inputs) == 1 and table_size(ts.get_train_stop_trains()) == 0 then
-			local ts_input = ts_inputs[1]
-
-			local from, to = string.find(ts.backer_name, '%[virtual%-signal=ltn%-cleanup%-station%]')
-			if ts_input and from == nil and to == nil then
-				local provided = {}
-				local requested = {}
-				local skip = false
-				for _, signal in ipairs(ts_input.get_merged_signals() or {}) do
-					if signal.signal.type ~= 'virtual' then
-						if signal.count > 0 then
-							table.insert(provided, '['..signal.signal.type..'='..signal.signal.name..']')
-						else
-							table.insert(requested, '['..signal.signal.type..'='..signal.signal.name..']')
-						end
-					elseif signal.signal.name == 'ltn-depot' then
-						skip = true
-					end
-				end
-
-				if not skip then
-					if number == nil then
-						while used_numbers[next_number] do
-							next_number = next_number + 1
-						end
-						number = next_number
-					end
-
-					used_numbers[number] = true
-
-					local name_segments = {}
-					table.insert(name_segments, string.format('%0'..total_count_log..'d', number))
-					if table_size(provided) > 0 then
-						table.insert(name_segments, 'P: '..table.concat(provided, ' '))
-					end
-					if table_size(requested) > 0 then
-						table.insert(name_segments, 'R: '..table.concat(requested, ' '))
-					end
-
-					ts.backer_name = table.concat(name_segments, ', ')
-				end
-			end
-		end
-	end
-
-	local do_later = {}
-	for _, ts in ipairs(game.player.surface.find_entities_filtered({name = 'logistic-train-stop'})) do
-		local _, _, number, _ = string.find(ts.backer_name, '^(%d+)(, .*)?$')
-		if number then
-			number = tonumber(number)
-			if not used_numbers[number] then
-				used_numbers[number] = true
-				rename(ts, number)
-			else
-				table.insert(do_later, ts)
-			end
-		else
-			table.insert(do_later, ts)
-		end
-	end
-	for _, ts in ipairs(do_later) do
-		rename(ts, nil)
-	end
 end
