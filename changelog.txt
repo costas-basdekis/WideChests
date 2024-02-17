@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 5.0.3
+Date: 17.2.2024
+  Bugfixes:
+    - Fixed next_upgrade not working when the merge mod is not enabled.
+  Translation:
+    - Added Ukraine translations. Thanks to MetenBouldry
+
+---------------------------------------------------------------------------------------------------
 Version: 5.0.2
 Date: 3.2.2024
   Translation:

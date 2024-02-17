@@ -101,26 +101,19 @@ local function create_entity(entity_data, loc_name, subgroup, width, height, seg
 		}
 	end
 
-	local name = MergingChests.get_merged_chest_name(entity_data.chest_name, width, height)
+	local merged_chest_name = MergingChests.get_merged_chest_name(entity_data.chest_name, width, height)
 
-	entity_data.override_prototype_properties = entity_data.override_prototype_properties or {}
-
-	local next_upgrade_name = entity_data.override_prototype_properties.next_upgrade or base_chest.next_upgrade
-	entity_data.override_prototype_properties.next_upgrade = nil
-	local next_upgrade = next_upgrade_name and MergingChests.get_merged_chest_name(next_upgrade_name, width, height) or nil
-
-	table.insert(data.raw['selection-tool'][MergingChests.merge_selection_tool_name].alt_entity_filters, name)
+	table.insert(data.raw['selection-tool'][MergingChests.merge_selection_tool_name].alt_entity_filters, merged_chest_name)
 
 	return util.merge({
 		type_specific_properties,
 		{
-			name = name,
+			name = merged_chest_name,
 			localised_name = loc_name,
 			icon = base_chest.icon,
 			icons = base_chest.icons,
 			icon_size = base_chest.icon_size,
 			fast_replaceable_group = 'merged-container',
-			next_upgrade = next_upgrade,
 			open_sound = base_chest.open_sound,
 			close_sound = base_chest.close_sound,
 			max_health = base_chest.max_health * math.min(width * height, 10),
@@ -138,7 +131,7 @@ local function create_entity(entity_data, loc_name, subgroup, width, height, seg
 			circuit_connector_sprites = connector.sprites,
 			circuit_wire_max_distance = default_circuit_wire_max_distance + math.min(width, height) - 1,
 		},
-		entity_data.override_prototype_properties
+		entity_data.override_prototype_properties or {}
 	})
 end
 
@@ -271,6 +264,7 @@ end
 --- Sets next_upgrade of chests of type `type` merged from `chest_name`
 --- @param type `logistic-container` | `container`
 --- @param chest_name string
+--- @param next_upgrade string
 function MergingChests.set_next_upgrade_of(type, chest_name, next_upgrade)
     for _, prototype in pairs(data.raw[type]) do
         local name, width, height = MergingChests.get_merged_chest_info(prototype.name)
