@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 5.1.0
+Date: 26.2.2024
+  Features:
+    - Created toggle mods which create size and inventory mod settings for all mergable chest types.
+  Bugfixes:
+    - Fixed inventory bar being set to higher than game limit during merging.
+
+---------------------------------------------------------------------------------------------------
 Version: 5.0.3
 Date: 17.2.2024
   Bugfixes:

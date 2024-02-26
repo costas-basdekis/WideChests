@@ -1,6 +1,6 @@
 {
 	"name": "WideChests",
-	"version": "5.0.3",
+	"version": "5.1.0",
 	"factorio_version": "1.1",
 	"title": "Merging Chests",
 	"author": "Atria",
@@ -10,6 +10,8 @@
 	"dependencies": [
 		"flib >= 0.12.9",
 		"? WideChestsAllTypes",
-		"? WideChestsUnlimited"
+		"? WideChestsUnlimited",
+		"? WideChestsOverrideSizeSettings",
+		"? WideChestsOverrideInventorySettings"
 	]
 }

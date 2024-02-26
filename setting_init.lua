@@ -49,6 +49,9 @@ function MergingChests.create_mergeable_chest_setting(chest_name, options)
         error('All mergeable modes are disabled for '..chest_name)
     end
 
+    options.size_settings = options.size_settings or MergingChests.is_mod_active(MergingChests.override_size_settings_mod_name)
+    options.inventory_settings = options.inventory_settings or MergingChests.is_mod_active(MergingChests.override_inventory_settings_mod_name)
+
     local has_custom_settings = options.size_settings or options.inventory_settings or options.threshold_setting or options.circuit_connection_setting
 
     data:extend({

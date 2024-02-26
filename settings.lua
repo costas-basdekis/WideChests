@@ -107,3 +107,16 @@ data:extend(
 		order = '12'
 	}
 })
+
+if MergingChests.is_mod_active(MergingChests.override_size_settings_mod_name) then
+	data.raw['int-setting'][MergingChests.setting_names.max_width].hidden = true
+	data.raw['int-setting'][MergingChests.setting_names.max_height].hidden = true
+	data.raw['int-setting'][MergingChests.setting_names.max_area].hidden = true
+	data.raw['string-setting'][MergingChests.setting_names.whitelist].hidden = true
+	data.raw['bool-setting'][MergingChests.setting_names.mirror_whitelist].hidden = true
+
+end
+if MergingChests.is_mod_active(MergingChests.override_inventory_settings_mod_name) then
+	data.raw['double-setting'][MergingChests.setting_names.inventory_size_multiplier].hidden = true
+	data.raw['int-setting'][MergingChests.setting_names.inventory_size_limit].hidden = true
+end

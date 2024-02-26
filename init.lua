@@ -6,9 +6,11 @@ MergingChests = MergingChests or { }
 MergingChests.mod_name = 'WideChests'
 MergingChests.all_types_mod_name = 'WideChestsAllTypes'
 MergingChests.unlimited_mod_name = 'WideChestsUnlimited'
+MergingChests.override_size_settings_mod_name = 'WideChestsOverrideSizeSettings'
+MergingChests.override_inventory_settings_mod_name = 'WideChestsOverrideInventorySettings'
 
 function MergingChests.is_mod_active(mod)
-	return (mods or script.active_mods)[mod]
+	return not not (mods or script.active_mods)[mod]
 end
 
 --- @param value string
@@ -272,7 +274,7 @@ function MergingChests.get_inventory_size(default_inventory_size, tiles, chest_n
 	return util.clamp(
 		math.floor(default_inventory_size * tiles * mod_settings.inventory_size_multiplier),
 		1,
-		mod_settings.inventory_size_limit
+		math.min(mod_settings.inventory_size_limit, 65536)
 	)
 end
 
