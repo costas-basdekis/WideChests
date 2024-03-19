@@ -78,7 +78,7 @@ function MergingChests.move_inventory_bar(from_entities, to_entities)
 	for _, entity in ipairs(to_entities) do
 		local inventory = entity.get_inventory(defines.inventory.chest)
 		if inventory and inventory.supports_bar() then
-			local bar = math.min(fmath.round(bar_count / to_entities_count), 65536)
+			local bar = math.min(fmath.round(bar_count / to_entities_count), 65535)
 			inventory.set_bar(bar + 1)
 			bar_count = bar_count - bar
 			to_entities_count = to_entities_count - 1
