@@ -16,16 +16,26 @@ end
 
 --- @param entities LuaEntity[]
 --- @return { [string]: LuaEntity[] }
+--- @return { [string]: LuaEntity[] }
 local function group_by_name(entities)
 	local groups = { }
+	local ghost_groups = { }
 	for _, entity in ipairs(entities) do
 		local entity_name = entity.name
-		if not groups[entity_name] then
-			groups[entity_name] = { }
+		if entity_name == "entity-ghost" then
+			entity_name = entity.ghost_name
+			if not ghost_groups[entity_name] then
+				ghost_groups[entity_name] = { }
+			end
+			table.insert(ghost_groups[entity_name], entity)
+		else
+			if not groups[entity_name] then
+				groups[entity_name] = { }
+			end
+			table.insert(groups[entity_name], entity)
 		end
-		table.insert(groups[entity_name], entity)
 	end
-	return groups
+	return groups, ghost_groups
 end
 
 --- @alias Histogram
@@ -119,6 +129,10 @@ end
 --- @return ChestGroup[]
 local function group_chests(entities)
 	local chest_name = entities[1].name
+	local is_ghost = chest_name == "entity-ghost"
+	if is_ghost then
+		chest_name = entities[1].ghost_name
+	end
 	local chest_grid = MergingChests.entities_to_grid(entities)
 
 	local groups = { }
@@ -141,7 +155,8 @@ local function group_chests(entities)
 			local group = {
 				entities = { },
 				merged_chest_name = MergingChests.get_merged_chest_name(chest_name, bounding_box.width(rectangle), bounding_box.height(rectangle)),
-				bounding_box = rectangle
+				bounding_box = rectangle,
+				is_ghost = is_ghost,
 			}
 			for x = rectangle.left_top.x, rectangle.right_bottom.x - 1 do
 				for y = rectangle.left_top.y, rectangle.right_bottom.y - 1 do
@@ -161,25 +176,50 @@ end
 --- @param player LuaPlayer
 --- @param chest_name string
 --- @param position MapPosition
+--- @param is_ghost boolean
 --- @return LuaEntity?
-local function create_merged_chest(player, chest_name, position)
-	return player.surface.create_entity({
-		name = chest_name,
+local function create_merged_chest(player, chest_name, position, is_ghost)
+	local entity_data = {
 		position = position,
 		force = player.force,
 		raise_built = true
-	})
+	}
+	if is_ghost then
+		entity_data.name = "entity-ghost"
+		entity_data.inner_name = chest_name
+	else
+		entity_data.name = chest_name
+	end
+	return player.surface.create_entity(entity_data)
 end
 
 local function on_player_selected_area(event)
 	if event.item and event.item == MergingChests.merge_selection_tool_name then
 		local player = game.players[event.player_index]
 
-		local entity_groups = group_by_name(event.entities)
+		local entity_groups, ghost_groups = group_by_name(event.entities)
+		for _, entities in pairs(ghost_groups) do
+			for _, chest_group_to_merge in ipairs(group_chests(entities)) do
+				local merged_chest = create_merged_chest(player, chest_group_to_merge.merged_chest_name, bounding_box.center(chest_group_to_merge.bounding_box), true)
+				if merged_chest then
+					raise_on_chest_merged({
+						player_index = event.player_index,
+						surface = event.surface,
+						merged_chest = merged_chest,
+						split_chests = chest_group_to_merge.entities,
+						is_ghost = false,
+					})
+
+					for _, entity in ipairs(chest_group_to_merge.entities) do
+						entity.destroy({ raise_destroy = true })
+					end
+				end
+			end
+		end
 		for _, entities in pairs(entity_groups) do
 			for _, chest_group_to_merge in ipairs(group_chests(entities)) do
 				if MergingChests.can_move_inventories(chest_group_to_merge.entities, chest_group_to_merge.merged_chest_name, bounding_box.area(chest_group_to_merge.bounding_box)) then
-					local merged_chest = create_merged_chest(player, chest_group_to_merge.merged_chest_name, bounding_box.center(chest_group_to_merge.bounding_box))
+					local merged_chest = create_merged_chest(player, chest_group_to_merge.merged_chest_name, bounding_box.center(chest_group_to_merge.bounding_box), false)
 					if merged_chest then
 						MergingChests.move_inventories(chest_group_to_merge.entities, { merged_chest })
 						MergingChests.move_inventory_bar(chest_group_to_merge.entities, { merged_chest })
@@ -189,7 +229,8 @@ local function on_player_selected_area(event)
 							player_index = event.player_index,
 							surface = event.surface,
 							merged_chest = merged_chest,
-							split_chests = chest_group_to_merge.entities
+							split_chests = chest_group_to_merge.entities,
+							is_ghost = false,
 						})
 
 						for _, entity in ipairs(chest_group_to_merge.entities) do

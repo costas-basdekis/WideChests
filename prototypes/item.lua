@@ -12,7 +12,7 @@ data:extend({
 		selection_color = { r = 0, g = 0, b = 1 },
 		alt_selection_color = { r = 1, g = 0, b = 0 },
 		flags = { 'only-in-cursor' },
-		selection_mode = { 'buildable-type' },
+		selection_mode = { 'deconstruct' },
 		alt_selection_mode = { 'buildable-type' },
 		selection_cursor_box_type = 'entity',
 		alt_selection_cursor_box_type = 'entity',
