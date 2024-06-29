@@ -202,6 +202,8 @@ local function on_player_selected_area(event)
 			for _, chest_group_to_merge in ipairs(group_chests(entities)) do
 				local merged_chest = create_merged_chest(player, chest_group_to_merge.merged_chest_name, bounding_box.center(chest_group_to_merge.bounding_box), true)
 				if merged_chest then
+					MergingChests.reconnect_circuits(chest_group_to_merge.entities, { merged_chest })
+
 					raise_on_chest_merged({
 						player_index = event.player_index,
 						surface = event.surface,

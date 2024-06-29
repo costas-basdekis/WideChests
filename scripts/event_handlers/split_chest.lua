@@ -51,6 +51,9 @@ local function on_player_alt_selected_area(event)
 			if split_chest_name ~= nil and width ~= nil and height ~= nil then
 				if is_ghost then
 					local split_chests = create_split_chest(merged_chest, split_chest_name, width, height, player, true)
+
+					MergingChests.reconnect_circuits({ merged_chest }, split_chests)
+
 					raise_on_chest_split({
 						player_index = event.player_index,
 						surface = event.surface,
