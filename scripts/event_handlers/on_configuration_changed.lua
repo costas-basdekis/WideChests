@@ -31,5 +31,4 @@ local function on_force_created(event)
 end
 
 script.on_configuration_changed(on_configuration_changed)
-script.on_event(defines.events.on_surface_created, on_surface_created)
 script.on_event(defines.events.on_force_created, on_force_created)
