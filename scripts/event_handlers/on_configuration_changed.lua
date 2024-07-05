@@ -1,26 +1,35 @@
 local function on_configuration_changed()
-    if game.surfaces[MergingChests.merge_surface_name] then
-        game.delete_surface(MergingChests.merge_surface_name)
+    local surface = game.get_surface(MergingChests.merge_surface_name)
+    if not surface then
+        surface = game.create_surface(MergingChests.merge_surface_name, {
+            default_enable_all_autoplace_controls = false,
+            property_expression_names = {
+                cliffiness = 0
+            },
+            starting_area = "none"
+        })
     end
+end
 
-    local surface = game.create_surface(MergingChests.merge_surface_name, {
-        default_enable_all_autoplace_controls = false,
-        property_expression_names = {
-            cliffiness = 0
-        },
-        starting_area = "none"
-    })
+local function on_surface_created(event)
+    local surface = game.get_surface(event.surface_index)
+    if surface and surface.name == MergingChests.merge_surface_name then
+        surface.generate_with_lab_tiles = true
+        surface.peaceful_mode = true
 
-    surface.generate_with_lab_tiles = true
-
-    for _, force in pairs(game.forces) do
-        force.chart(surface, {{-1, -1}, {1, 1}})
+        for _, force in pairs(game.forces) do
+            force.chart(surface, {{-1, -1}, {1, 1}})
+        end
     end
 end
 
 local function on_force_created(event)
-    event.force.chart(game.surfaces[MergingChests.merge_surface_name], {{-1, -1}, {1, 1}})
+    local surface = game.get_surface(MergingChests.merge_surface_name)
+    if surface then
+        event.force.chart(surface, {{-1, -1}, {1, 1}})
+    end
 end
 
 script.on_configuration_changed(on_configuration_changed)
+script.on_event(defines.events.on_surface_created, on_surface_created)
 script.on_event(defines.events.on_force_created, on_force_created)
