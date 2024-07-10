@@ -7,6 +7,14 @@ local function on_shortcut(event)
 				stack.set_stack({ name = MergingChests.merge_selection_tool_name })
 			end
 		end
+	elseif event.prototype_name == MergingChests.merge_full_shortcut_name then
+		local player = game.players[event.player_index]
+		if player.clear_cursor() then
+			local stack = player.cursor_stack
+			if stack and stack.can_set_stack({ name = MergingChests.merge_full_selection_tool_name }) then
+				stack.set_stack({ name = MergingChests.merge_full_selection_tool_name })
+			end
+		end
 	end
 end
 

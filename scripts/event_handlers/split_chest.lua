@@ -44,7 +44,7 @@ local function create_split_chest(merged_chest, split_chest_name, width, height,
 end
 
 local function on_player_alt_selected_area(event)
-	if event.item and event.item == MergingChests.merge_selection_tool_name then
+	if event.item and (event.item == MergingChests.merge_selection_tool_name or event.item == MergingChests.merge_full_selection_tool_name) then
 		local player = game.players[event.player_index]
 
 		for _, merged_chest in ipairs(event.entities) do

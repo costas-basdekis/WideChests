@@ -104,6 +104,8 @@ local function create_entity(entity_data, loc_name, subgroup, width, height, seg
 	local merged_chest_name = MergingChests.get_merged_chest_name(entity_data.chest_name, width, height)
 
 	table.insert(data.raw['selection-tool'][MergingChests.merge_selection_tool_name].alt_entity_filters, merged_chest_name)
+	table.insert(data.raw['selection-tool'][MergingChests.merge_full_selection_tool_name].entity_filters, merged_chest_name)
+	table.insert(data.raw['selection-tool'][MergingChests.merge_full_selection_tool_name].alt_entity_filters, merged_chest_name)
 
 	return util.merge({
 		type_specific_properties,
@@ -257,6 +259,7 @@ function MergingChests.create_mergeable_chest(entity_data, segments_data)
 
 	if enable_chest or enable_warehouse or enable_trashdump then
 		table.insert(data.raw['selection-tool'][MergingChests.merge_selection_tool_name].entity_filters, entity_data.chest_name)
+		table.insert(data.raw['selection-tool'][MergingChests.merge_full_selection_tool_name].entity_filters, entity_data.chest_name)
 		data.raw.item[entity_data.chest_name].stack_size = math.max(data.raw.item[entity_data.chest_name].stack_size, max_area)
 	end
 end

@@ -42,8 +42,10 @@ MergingChests.item_group_names = {
 }
 
 MergingChests.merge_selection_tool_name = MergingChests.prefix_with_modname('merge-chest-selector')
+MergingChests.merge_full_selection_tool_name = MergingChests.prefix_with_modname('merge-chest-selector-full')
 
 MergingChests.merge_shortcut_name = MergingChests.prefix_with_modname('merge-chest-selector')
+MergingChests.merge_full_shortcut_name = MergingChests.prefix_with_modname('merge-chest-selector-full')
 
 MergingChests.setting_names = {
 	mergeable_chest = MergingChests.prefix_with_modname('mergeable-chest'),
